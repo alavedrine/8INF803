@@ -52,7 +52,7 @@ for ref in refs:
             if span.find('b', text='Casting Time'):
                 casting = span.find('b', text='Casting Time').next_sibling.string.strip()
             else:
-                casting= ""
+                casting = ""
             
             if span.find('b', text='Components'):
                 components = span.find('b', text='Components').next_sibling.string.strip().split(', ')
