@@ -34,15 +34,25 @@ for ref in refs:
     for span in soup_spell.find_all('span', {"id": re.compile("^ctl00_MainContent_DataListTypes_ct")}):
         if span.find('h1'):
             title = span.find('h1', attrs={'class': 'title'}).text.strip()
+            found = False
             if span.find('b', text='Level'):
                 levels = span.find('b', text='Level').next_sibling.string.strip().split(', ')
-            else:
-                levels = []
+                for l in levels: 
+                    split = l.split(" ")
+                    if split[0] != "wizard":
+                        continue
+                    if split[0] == "wizard" and int(split[1]) <= 4:
+                        level = split[1]
+                        found = True
+                    else:
+                        continue
+            if found is False:
+                continue
 
             if span.find('b', text='Casting Time'):
                 casting = span.find('b', text='Casting Time').next_sibling.string.strip()
             else:
-                casting=""
+                casting = ""
             
             if span.find('b', text='Components'):
                 components = span.find('b', text='Components').next_sibling.string.strip().split(', ')
@@ -61,7 +71,7 @@ for ref in refs:
 
             res = {
                 'name': title,
-                'levels': levels,
+                'level': level,
                 'casting_time': casting,
                 'components': components,
                 'spell_resistance': resistance,
