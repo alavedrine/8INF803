@@ -5,8 +5,12 @@ import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions.{col, collect_list, explode_outer}
 import org.apache.spark.SparkContext._
 
+import scala.collection.mutable
+
 object Healing extends App {
     case class Creature(name: String, spells: Array[String])
+    case class Spell(spell: String, creatures: Array[String])
+
     val spark = SparkSession
     .builder()
     .appName("Healing")
@@ -26,12 +30,11 @@ object Healing extends App {
    // rddVersion(reversedDF)
 
     def dataframeVersion(df: DataFrame): Unit = {
-        val mergedReversedDf = df.groupBy($"spell").agg(collect_list($"name").as("creatures"))
-
-        mergedReversedDf.show()
+        val mergedReversedDf = df.groupBy($"spell").agg(collect_list($"name").as("creatures")).as[Spell]
 
         mergedReversedDf.foreach(row => {
-            print("Spell : " + row.get(0) + " Creatures : " + row.get(1).toString)
+            print("Spell : " + row.spell + "  Creatures : ")
+            row.creatures.foreach(creature => print(creature + "; "))
             println()
         })
 
