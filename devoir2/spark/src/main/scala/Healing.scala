@@ -26,9 +26,6 @@ object Healing extends App {
     println("DataFrame version :")
     dataframeVersion(reversedDF)
 
-    println("RDD Version")
-   // rddVersion(reversedDF)
-
     def dataframeVersion(df: DataFrame): Unit = {
         val mergedReversedDf = df.groupBy($"spell").agg(collect_list($"name").as("creatures")).as[Spell]
 
@@ -41,16 +38,4 @@ object Healing extends App {
        // mergedReversedDf.rdd.saveAsTextFile(savePath)
     }
 
-    // Ne fonctionne pas
-    def rddVersion(df: DataFrame): Unit = {
-        val rdd = df.rdd.groupBy(c => c.get(1)).mapValues(_.toArray)
-
-        rdd.foreach(row => {
-            print("Spell : " + row._1 + " Creatures : ")
-            row._2.foreach(creature => print(creature + ";"))
-            println()
-        })
-
-       // rdd.saveAsTextFile(savePath)
-    }
 }
