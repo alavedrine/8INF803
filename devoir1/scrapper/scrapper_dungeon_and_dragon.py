@@ -34,36 +34,26 @@ for ref in refs:
     for span in soup_spell.find_all('span', {"id": re.compile("^ctl00_MainContent_DataListTypes_ct")}):
         if span.find('h1'):
             title = span.find('h1', attrs={'class': 'title'}).text.strip()
-            found = False
             if span.find('b', text='Level'):
                 levels = span.find('b', text='Level').next_sibling.string.strip().split(', ')
-                for l in levels: 
-                    split = l.split(" ")
-                    if split[0] != "wizard":
-                        continue
-                    if split[0] == "wizard" and int(split[1]) <= 4:
-                        level = split[1]
-                        found = True
-                    else:
-                        continue
-            if found is False:
-                continue
+            else:
+                levels = []
 
             if span.find('b', text='Casting Time'):
                 casting = span.find('b', text='Casting Time').next_sibling.string.strip()
             else:
-                casting = ""
-            
+                casting=""
+
             if span.find('b', text='Components'):
                 components = span.find('b', text='Components').next_sibling.string.strip().split(', ')
             else:
                 components = []
-            
+
             if span.find('b', text='Spell Resistance'):
                 resistance = span.find('b', text='Spell Resistance').next_sibling.string.strip()
             else:
                 resistance = "False"
-            
+
             if span.find('h3', text='Description'):
                 description = span.find('h3', text='Description').next_sibling.string.strip()
             else:
@@ -71,15 +61,17 @@ for ref in refs:
 
             res = {
                 'name': title,
-                'level': level,
+                'levels': levels,
                 'casting_time': casting,
                 'components': components,
                 'spell_resistance': resistance,
-                'description': description
+                'description': description,
+                'url': spell_url
             }
             data.append(res)
 
 
 with open('spells.json', 'w', encoding='utf-8') as f:
     json.dump(data, f, indent=4, ensure_ascii=False)
-    print("Created Json File")
+    print("Created Json File") 
+    

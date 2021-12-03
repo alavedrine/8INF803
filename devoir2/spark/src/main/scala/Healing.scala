@@ -35,7 +35,7 @@ object Healing extends App {
             println()
         })
 
-       // mergedReversedDf.rdd.saveAsTextFile(savePath)
+//        mergedReversedDf.rdd.repartition(1).saveAsTextFile(savePath)
     }
 
 }
