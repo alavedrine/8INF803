@@ -1,6 +1,6 @@
 package com.bd.front;
 
-import com.bd.front.context.LocalSparkContext;
+import com.bd.front.context.LocalSparkSession;
 import com.bd.front.jobs.SearchJob;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -20,7 +20,7 @@ public class SearchController implements Initializable {
     private ArrayList allClasses = new ArrayList(Arrays.asList("Adept", "Alchemist", "Antipaladin", "Bard", "Bloodrager", "Cleric", "Druid", "Inquisitor", "Magus", "Oracle", "Paladin", "Ranger", "Shaman", "Sorcerer", "Summoner", "Witch", "Wizard"));
     private ArrayList<String> selectedClasses = new ArrayList<>();
 
-    LocalSparkContext sparkContext;
+    LocalSparkSession sparkSession;
     SearchJob searchJob;
 
     @FXML
@@ -142,6 +142,8 @@ public class SearchController implements Initializable {
                         + "Usable by : " + String.join(", ", getSelectedClasses()) + "\n"
                         + "With logic : " + getLogic() + "\n"
                         + "With keywords : " + String.join(", ", getKeywords()));
+
+        new Thread(() -> searchJob.startJob()).start();
     }
 
     @FXML
@@ -172,7 +174,7 @@ public class SearchController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        sparkContext = LocalSparkContext.getInstance();
-        searchJob = new SearchJob(sparkContext.getSparkContext());
+        sparkSession = LocalSparkSession.getInstance();
+        searchJob = new SearchJob(sparkSession.getSparkSession());
     }
 }
