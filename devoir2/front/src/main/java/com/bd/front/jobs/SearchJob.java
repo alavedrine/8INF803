@@ -32,6 +32,9 @@ public class SearchJob {
     private final SparkSession sparkSession;
     private final SecureRandom random = new SecureRandom();
 
+    public Dataset<Spell> dsSpells;
+    public Dataset<Creature> dsCreatures;
+
     public SearchJob(SparkSession sparkSession)
     {
         this.sparkSession = sparkSession;
@@ -42,14 +45,14 @@ public class SearchJob {
         Encoder<Creature> creatureEncoder = Encoders.bean(Creature.class);
         Encoder<Spell> spellEncoder = Encoders.bean(Spell.class);
 
-        String creaturesJsonpath = SearchSpellApplication.class.getResource("creatures.json").getPath();
-        String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
+//        String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
+//        String creaturesJsonpath = SearchSpellApplication.class.getResource("creatures.json").getPath();
 
-        System.out.println("ABCD " + creaturesJsonpath);
+//        System.out.println("ABCD " + creaturesJsonpath);
 
         // read JSON file to Dataset
-        Dataset<Creature> dsCreatures = sparkSession.read().json(creaturesJsonpath).as(creatureEncoder);
-        Dataset<Spell> dsSpells = sparkSession.read().json(spellsJsonPath).as(spellEncoder);
+        dsSpells = sparkSession.read().option("multiline", "true").json("C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\spells.json").as(spellEncoder);
+        dsCreatures = sparkSession.read().option("multiline", "true").json("C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\creatures.json").as(creatureEncoder);
 
         dsCreatures.show();
         dsSpells.show();
