@@ -8,5 +8,6 @@ module com.bd.front {
     requires org.kordamp.bootstrapfx.core;
 
     opens com.bd.front to javafx.fxml;
+
     exports com.bd.front;
 }

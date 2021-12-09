@@ -1,19 +1,27 @@
 package com.bd.front;
 
+import com.bd.front.context.LocalSparkContext;
+import com.bd.front.jobs.SearchJob;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
-public class SearchController {
+public class SearchController implements Initializable {
     private ArrayList<String> keywords = new ArrayList<>();
     private ArrayList allClasses = new ArrayList(Arrays.asList("Adept", "Alchemist", "Antipaladin", "Bard", "Bloodrager", "Cleric", "Druid", "Inquisitor", "Magus", "Oracle", "Paladin", "Ranger", "Shaman", "Sorcerer", "Summoner", "Witch", "Wizard"));
     private ArrayList<String> selectedClasses = new ArrayList<>();
+
+    LocalSparkContext sparkContext;
+    SearchJob searchJob;
 
     @FXML
     private ToggleGroup tgLogic;
@@ -160,5 +168,11 @@ public class SearchController {
         }
         selectedClasses.clear();
         keywords.clear();
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        sparkContext = LocalSparkContext.getInstance();
+        searchJob = new SearchJob(sparkContext.getSparkContext());
     }
 }
