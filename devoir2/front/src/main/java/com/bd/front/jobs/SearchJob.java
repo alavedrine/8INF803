@@ -3,15 +3,17 @@ package com.bd.front.jobs;
 import com.bd.front.SearchSpellApplication;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoder;
 import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.Dataset;
 
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SearchJob {
@@ -45,11 +47,9 @@ public class SearchJob {
         String creaturesJsonpath = SearchSpellApplication.class.getResource("creatures.json").getPath();
         String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
 
-        System.out.println("ABCD " + creaturesJsonpath);
-
         // read JSON file to Dataset
-        Dataset<Creature> dsCreatures = sparkSession.read().json(creaturesJsonpath).as(creatureEncoder);
-        Dataset<Spell> dsSpells = sparkSession.read().json(spellsJsonPath).as(spellEncoder);
+        Dataset<Creature> dsCreatures = sparkSession.read().option("multiline","true").json(creaturesJsonpath).as(creatureEncoder);
+        Dataset<Spell> dsSpells = sparkSession.read().option("multiline","true").json(spellsJsonPath).as(spellEncoder);
 
         dsCreatures.show();
         dsSpells.show();
