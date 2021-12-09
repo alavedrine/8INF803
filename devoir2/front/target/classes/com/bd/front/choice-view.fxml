@@ -57,23 +57,23 @@
             <Label layoutX="34.0" layoutY="54.0" text="Nom du sort" />
             <TextField fx:id="tfName" layoutX="34.0" layoutY="71.0" promptText="Entrez le nom" />
             <Label layoutX="34.0" layoutY="137.0" text="Classes du sort" />
-            <CheckBox layoutX="36.0" layoutY="162.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Adept" />
-            <CheckBox layoutX="36.0" layoutY="187.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Alchimist" />
-            <CheckBox layoutX="36.0" layoutY="237.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Bard" />
-            <CheckBox layoutX="36.0" layoutY="212.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Antipaladin" />
-            <CheckBox layoutX="143.0" layoutY="162.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Bloodrager" />
-            <CheckBox layoutX="143.0" layoutY="187.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Cleric" />
-            <CheckBox layoutX="143.0" layoutY="237.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Inquisitor" />
-            <CheckBox layoutX="143.0" layoutY="212.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Druid" />
-            <CheckBox layoutX="249.0" layoutY="163.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Magus" />
-            <CheckBox layoutX="249.0" layoutY="188.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Oracle" />
-            <CheckBox layoutX="249.0" layoutY="213.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Paladin" />
-            <CheckBox layoutX="358.0" layoutY="164.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Ranger" />
-            <CheckBox layoutX="358.0" layoutY="189.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Shaman" />
-            <CheckBox layoutX="358.0" layoutY="214.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Sorcerer" />
-            <CheckBox layoutX="463.0" layoutY="164.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Summoner" />
-            <CheckBox layoutX="463.0" layoutY="189.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Witch" />
-            <CheckBox layoutX="463.0" layoutY="214.0" mnemonicParsing="false" onAction="#onCheckBoxChecked" text="Wizard" />
+            <CheckBox layoutX="36.0" layoutY="162.0" mnemonicParsing="false" text="Adept" />
+            <CheckBox layoutX="36.0" layoutY="187.0" mnemonicParsing="false" text="Alchimist" />
+            <CheckBox layoutX="36.0" layoutY="237.0" mnemonicParsing="false"  text="Bard" />
+            <CheckBox layoutX="36.0" layoutY="212.0" mnemonicParsing="false"  text="Antipaladin" />
+            <CheckBox layoutX="143.0" layoutY="162.0" mnemonicParsing="false"  text="Bloodrager" />
+            <CheckBox layoutX="143.0" layoutY="187.0" mnemonicParsing="false"  text="Cleric" />
+            <CheckBox layoutX="143.0" layoutY="237.0" mnemonicParsing="false"  text="Inquisitor" />
+            <CheckBox layoutX="143.0" layoutY="212.0" mnemonicParsing="false"  text="Druid" />
+            <CheckBox layoutX="249.0" layoutY="163.0" mnemonicParsing="false"  text="Magus" />
+            <CheckBox layoutX="249.0" layoutY="188.0" mnemonicParsing="false"  text="Oracle" />
+            <CheckBox layoutX="249.0" layoutY="213.0" mnemonicParsing="false"  text="Paladin" />
+            <CheckBox layoutX="358.0" layoutY="164.0" mnemonicParsing="false"  text="Ranger" />
+            <CheckBox layoutX="358.0" layoutY="189.0" mnemonicParsing="false"  text="Shaman" />
+            <CheckBox layoutX="358.0" layoutY="214.0" mnemonicParsing="false"  text="Sorcerer" />
+            <CheckBox layoutX="463.0" layoutY="164.0" mnemonicParsing="false"  text="Summoner" />
+            <CheckBox layoutX="463.0" layoutY="189.0" mnemonicParsing="false"  text="Witch" />
+            <CheckBox layoutX="463.0" layoutY="214.0" mnemonicParsing="false"  text="Wizard" />
             <Label layoutX="222.0" layoutY="54.0" text="Niveau du sort ≥" />
             <Slider fx:id="sliderLevel" blockIncrement="1.0" layoutX="220.0" layoutY="77.0" majorTickUnit="1.0" max="9.0" min="0" minorTickCount="0" onMouseReleased="#onSliderMoved" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
             <Label fx:id="sliderValue" layoutX="344.0" layoutY="54.0" />
