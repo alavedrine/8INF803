@@ -8,7 +8,7 @@ public class LocalSparkContext
 
     private LocalSparkContext()
     {
-        sparkContext = new JavaSparkContext("local[*]", "SparkFX");
+        sparkContext = new JavaSparkContext("local[*]", "Test");
     }
 
     public JavaSparkContext getSparkContext()
