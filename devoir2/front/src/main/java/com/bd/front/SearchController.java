@@ -2,6 +2,7 @@ package com.bd.front;
 
 import com.bd.front.context.LocalSparkSession;
 import com.bd.front.jobs.SearchJob;
+import com.bd.front.struct.FilterModel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -22,6 +23,8 @@ public class SearchController implements Initializable {
 
     LocalSparkSession sparkSession;
     SearchJob searchJob;
+
+    FilterModel filterModel;
 
     @FXML
     private ToggleGroup tgLogic;
@@ -60,6 +63,7 @@ public class SearchController implements Initializable {
     @FXML
     public void onEnter(ActionEvent ae){
         keywords.add(tfKeywords.getText());
+        filterModel.getKeywords().add(tfKeywords.getText());
         tfKeywords.clear();
         lKeywords.setText(String.join(", ", keywords));
     }
@@ -73,6 +77,7 @@ public class SearchController implements Initializable {
             if (node instanceof CheckBox) {
                 if (((CheckBox) node).isSelected() && !((CheckBox) node).getText().equals("ALL")) {
                     selectedClasses.add(((CheckBox) node).getText());
+                    filterModel.getClasses().add(((CheckBox) node).getText());
                 }
             }
         }
@@ -88,21 +93,25 @@ public class SearchController implements Initializable {
     }
 
     public String getName() {
-
+        filterModel.setName(tfName.getText());
         return tfName.getText() != null ? tfName.getText() : "No particular name";
     }
 
     public String getLogic() {
+        String logic = tgLogic.getSelectedToggle() == null ? "OR" : ((ToggleButton)tgLogic.getSelectedToggle()).getText();
+        filterModel.setClassesLogic(logic);
         // default logic is "OR"
-        return tgLogic.getSelectedToggle() == null ? "OR" : ((ToggleButton)tgLogic.getSelectedToggle()).getText();
+        return logic;
     }
 
     public int getLevel() {
+        filterModel.setMinLevel((int) sliderLevel.getValue());
         return (int)sliderLevel.getValue();
     }
 
     private void addComponent(ToggleButton tb, List<String> arr) {
         if (tb.isSelected()) {
+            filterModel.getComponents().add(tb.getText());
             arr.add(tb.getText());
         }
     }
@@ -111,6 +120,7 @@ public class SearchController implements Initializable {
     protected void deleteLastKeyword(ActionEvent actionEvent) {
         if (keywords.size() > 0) {
             keywords.remove(keywords.size() - 1);
+            filterModel.getKeywords().remove(keywords.size() - 1);
             lKeywords.setText(String.join(", ", keywords));
         }
     }
@@ -143,11 +153,12 @@ public class SearchController implements Initializable {
                         + "With logic : " + getLogic() + "\n"
                         + "With keywords : " + String.join(", ", getKeywords()));
 
-        new Thread(() -> searchJob.startJob()).start();
+        new Thread(() -> searchJob.startJob(filterModel)).start();
     }
 
     @FXML
     public void reset(ActionEvent actionEvent) {
+        filterModel = new FilterModel();
         for (Node node : anchorPane.getChildren()) {
             if (node instanceof Slider) {
                 ((Slider) node).setValue(0);
@@ -176,5 +187,6 @@ public class SearchController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         sparkSession = LocalSparkSession.getInstance();
         searchJob = new SearchJob(sparkSession.getSparkSession());
+        filterModel = new FilterModel();
     }
 }

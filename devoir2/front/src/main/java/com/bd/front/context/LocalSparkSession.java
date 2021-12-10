@@ -11,7 +11,7 @@ public class LocalSparkSession
         sparkSession = SparkSession
                 .builder()
                 .appName("Search")
-                .master("local[2]")
+                .master("local[*]")
                 .getOrCreate();
     }
 

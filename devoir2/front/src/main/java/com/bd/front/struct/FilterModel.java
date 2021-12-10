@@ -1,9 +1,10 @@
 package com.bd.front.struct;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilterModel {
+public class FilterModel implements Serializable {
     private String name;
     private int minLevel;
     private int maxLevel = 9;
@@ -16,6 +17,19 @@ public class FilterModel {
         components = new ArrayList<>();
         classes = new ArrayList<>();
         keywords = new ArrayList<>();
+    }
+
+    @Override
+    public String toString() {
+        return "FilterModel{" +
+                "name='" + name + '\'' +
+                ", minLevel=" + minLevel +
+                ", maxLevel=" + maxLevel +
+                ", components=" + components +
+                ", classes=" + classes +
+                ", classesLogic='" + classesLogic + '\'' +
+                ", keywords=" + keywords +
+                '}';
     }
 
     public FilterModel(String name, int minLevel, int maxLevel, List<String> components, List<String> classes, String classesLogic, List<String> keywords) {
