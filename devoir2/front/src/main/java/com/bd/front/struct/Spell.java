@@ -14,6 +14,10 @@ public class Spell implements Serializable {
     public String spellResistance;
     public String description;
 
+    public Spell() {
+
+    }
+
     public Spell(String name, WrappedArray<String> levels, String castingTime, WrappedArray<String> components, String spellResistance, String description) {
         this.name = name;
         this.levels = levels;

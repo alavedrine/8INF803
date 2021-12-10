@@ -6,6 +6,8 @@ import com.bd.front.struct.FilterModel;
 import com.bd.front.struct.Spell;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FilterFunction;
+import org.apache.spark.api.java.function.ForeachFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Encoder;
@@ -14,6 +16,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.types.IntegerType;
+import scala.collection.mutable.WrappedArray;
 
 import javax.xml.crypto.Data;
 import java.io.Serializable;
@@ -24,19 +27,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Filter;
 
-public class SearchJob {
-
-
-
-
+public class SearchJob implements Serializable {
     private final SparkSession sparkSession;
     private final SecureRandom random = new SecureRandom();
 
-    Dataset<Row> dsCreatures;
+    Dataset<Creature> dsCreatures;
     Dataset<Row> dsSpells;
-
-    JavaRDD<Row> creatureRDD;
-    JavaRDD<Row> spellRDD;
 
     static FilterModel filterModel = new FilterModel();
 
@@ -49,7 +45,7 @@ public class SearchJob {
     {
         System.out.println(filterModel.toString());
 
-        filterModel = filterModel;
+        this.filterModel = filterModel;
 
         Encoder<Creature> creatureEncoder = Encoders.bean(Creature.class);
         Encoder<Spell> spellEncoder = Encoders.bean(Spell.class);
@@ -58,35 +54,31 @@ public class SearchJob {
         String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
 
         // read JSON file to Dataset
-        dsCreatures = sparkSession.read().option("multiline","true").json(creaturesJsonpath);
+        dsCreatures = sparkSession.read().option("multiline","true").json(creaturesJsonpath).as(creatureEncoder);
         dsSpells = sparkSession.read().option("multiline","true").json(spellsJsonPath);
 
         dsCreatures.show();
         dsSpells.show();
 
-        creatureRDD = dsCreatures.javaRDD();
-        spellRDD = dsSpells.javaRDD();
+        FilterFunction<Row> spellFilterFunction = new FilterFunction<Row>() {
+            @Override
+            public boolean call(Row spellRow) throws Exception {
+                Spell spell = new Spell(spellRow.getAs("name"),
+                        spellRow.getAs("levels"),
+                        spellRow.getAs("casting_time"),
+                        spellRow.getAs("components"),
+                        spellRow.getAs("spell_resistance"),
+                        spellRow.getAs("description"));
 
-        FilterModel finalFilterModel = filterModel;
-        Function<Row, Boolean> filter = spellRow -> {
-            Spell spell = new Spell(spellRow.getAs("name"),
-                    spellRow.getAs("levels"),
-                    spellRow.getAs("casting_time"),
-                    spellRow.getAs("components"),
-                    spellRow.getAs("spell_resistance"),
-                    spellRow.getAs("description"));
-
-            return spell.name.toLowerCase().contains(finalFilterModel.getName().toLowerCase())
-                    && true
-                    && true;
-                    // Apply every filter here
+                return spell.name.toLowerCase().contains(filterModel.getName().toLowerCase());
+            }
         };
 
-        spellRDD = spellRDD.filter(filter);
+
+        dsSpells = dsSpells.filter(spellFilterFunction);
 
         System.out.println("-- RESULTS --");
-        System.out.println("Result size = " + spellRDD.count());
-        spellRDD.foreach(spell -> System.out.println(spell.getAs("name").toString()));
+        System.out.println("Result size = " + dsSpells.count());
     }
 
     private String nextSessionId()
