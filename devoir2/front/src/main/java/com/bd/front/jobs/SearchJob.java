@@ -61,6 +61,21 @@ public class SearchJob implements Serializable {
         dsSpells.show();
 
         FilterFunction<Row> spellFilterFunction = new FilterFunction<Row>() {
+            private boolean containsComponent(String component) {
+                boolean result = false;
+                for (String c : filterModel.getComponents()) {
+                    result = result || component.contains(c);
+                }
+                return result;
+            }
+            private boolean matchesComponents(WrappedArray<String> components) {
+                int n = 0;
+                for(String s : (String[]) components.array()) {
+                    if (containsComponent(s)) n++;
+                }
+                return n == components.size();
+            }
+
             @Override
             public boolean call(Row spellRow) throws Exception {
                 Spell spell = new Spell(spellRow.getAs("name"),
@@ -70,7 +85,8 @@ public class SearchJob implements Serializable {
                         spellRow.getAs("spell_resistance"),
                         spellRow.getAs("description"));
 
-                return spell.name.toLowerCase().contains(filterModel.getName().toLowerCase());
+                return spell.name.toLowerCase().contains(filterModel.getName().toLowerCase())
+                        && matchesComponents(spell.components);
             }
         };
 
@@ -79,6 +95,12 @@ public class SearchJob implements Serializable {
 
         System.out.println("-- RESULTS --");
         System.out.println("Result size = " + dsSpells.count());
+        System.out.println("First 20 elements of result");
+        Row[] spells = (Row[]) dsSpells.collect();
+        for (int i = 0; i < spells.length && i < 20; i++) {
+            System.out.println((String) spells[i].getAs("name") + " - "
+                    + spells[i].getAs("components"));
+        }
     }
 
     private String nextSessionId()
