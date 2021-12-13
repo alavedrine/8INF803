@@ -99,7 +99,7 @@ public class SearchJob implements Serializable {
                     if (filterModel
                             .getClasses()
                             .stream()
-                            .map(e -> e.toLowerCase())
+                            .map(String::toLowerCase)
                             .collect(Collectors.toList())
                             .contains(c) && filterModel.getMinLevel() <= level) {
                         if (filterModel.getClassesLogic().equals("OR")) {
@@ -122,6 +122,46 @@ public class SearchJob implements Serializable {
                 return name.toLowerCase().contains(filterModel.getName().toLowerCase());
             }
 
+            public boolean matchesKeywords(String name, String description, String castingTime, WrappedArray<String> levels, WrappedArray<String> components) {
+                if (filterModel.getKeywords().size() == 0) {
+                    return true;
+                }
+                // add all words from description
+                description = description.replaceAll("[.,()\"]", "");
+                List<String> textToSearch = Arrays.stream(description.split(" ")).collect(Collectors.toList());
+
+                // add all words from name
+                name = name.replaceAll("[.,()\"]", "");
+                textToSearch.addAll(Arrays.asList(name.split(" ")));
+
+                // add whole expression from casting time
+                textToSearch.add(castingTime);
+                // add all words from casting time
+                castingTime = castingTime.replaceAll("[.,()\"]", "");
+                textToSearch.addAll(Arrays.asList(castingTime.split(" ")));
+
+                // add all words from levels
+                for (String s : (String[]) levels.array()) {
+                    textToSearch.addAll(Arrays.asList(s.split(" ")));
+                }
+                for (String s : (String[]) components.array()) {
+                    textToSearch.addAll(Arrays.asList(s.split(" ")));
+                }
+                textToSearch = textToSearch.stream().map(String::toLowerCase).collect(Collectors.toList());
+
+                for (String text : textToSearch) {
+                    if (filterModel
+                            .getKeywords()
+                            .stream()
+                            .map(String::toLowerCase)
+                            .collect(Collectors.toList())
+                            .contains(text)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             @Override
             public boolean call(Row spellRow) throws Exception {
                 Spell spell = new Spell(spellRow.getAs("name"),
@@ -133,10 +173,10 @@ public class SearchJob implements Serializable {
 
                 return matchesName(spell.name)
                         && matchesComponents(spell.components)
-                        && matchesClassesAndLevel(spell.levels);
+                        && matchesClassesAndLevel(spell.levels)
+                        && matchesKeywords(spell.name, spell.description, spell.castingTime, spell.levels, spell.components);
             }
         };
-
 
         dsSpells = dsSpells.filter(spellFilterFunction);
 
