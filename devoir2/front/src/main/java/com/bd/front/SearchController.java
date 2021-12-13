@@ -3,6 +3,8 @@ package com.bd.front;
 import com.bd.front.context.LocalSparkSession;
 import com.bd.front.jobs.SearchJob;
 import com.bd.front.struct.FilterModel;
+import com.bd.front.struct.Spell;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -25,6 +27,9 @@ public class SearchController implements Initializable {
     SearchJob searchJob;
 
     FilterModel filterModel;
+
+    @FXML
+    private ListView resultList;
 
     @FXML
     private ToggleGroup tgLogic;
@@ -63,7 +68,6 @@ public class SearchController implements Initializable {
     @FXML
     public void onEnter(ActionEvent ae){
         keywords.add(tfKeywords.getText());
-        filterModel.getKeywords().add(tfKeywords.getText());
         tfKeywords.clear();
         lKeywords.setText(String.join(", ", keywords));
     }
@@ -77,7 +81,6 @@ public class SearchController implements Initializable {
             if (node instanceof CheckBox) {
                 if (((CheckBox) node).isSelected() && !((CheckBox) node).getText().equals("ALL")) {
                     selectedClasses.add(((CheckBox) node).getText());
-                    filterModel.getClasses().add(((CheckBox) node).getText());
                 }
             }
         }
@@ -93,25 +96,21 @@ public class SearchController implements Initializable {
     }
 
     public String getName() {
-        filterModel.setName(tfName.getText());
-        return tfName.getText() != null ? tfName.getText() : "No particular name";
+        return tfName.getText() != null ? tfName.getText() : "";
     }
 
     public String getLogic() {
         String logic = tgLogic.getSelectedToggle() == null ? "OR" : ((ToggleButton)tgLogic.getSelectedToggle()).getText();
-        filterModel.setClassesLogic(logic);
         // default logic is "OR"
         return logic;
     }
 
     public int getLevel() {
-        filterModel.setMinLevel((int) sliderLevel.getValue());
         return (int)sliderLevel.getValue();
     }
 
     private void addComponent(ToggleButton tb, List<String> arr) {
         if (tb.isSelected()) {
-            filterModel.getComponents().add(tb.getText());
             arr.add(tb.getText());
         }
     }
@@ -120,7 +119,6 @@ public class SearchController implements Initializable {
     protected void deleteLastKeyword(ActionEvent actionEvent) {
         if (keywords.size() > 0) {
             keywords.remove(keywords.size() - 1);
-            filterModel.getKeywords().remove(keywords.size() - 1);
             lKeywords.setText(String.join(", ", keywords));
         }
     }
@@ -146,14 +144,20 @@ public class SearchController implements Initializable {
 
     @FXML
     public void search(ActionEvent actionEvent) {
-        lResult.setText("Searching for : " + getName() + "\n"
-                        + "Level range is : " + getLevel() + " - 9\n"
-                        + "Components are : " + String.join(", ", getComponents()) + "\n"
-                        + "Usable by : " + String.join(", ", getSelectedClasses()) + "\n"
-                        + "With logic : " + getLogic() + "\n"
-                        + "With keywords : " + String.join(", ", getKeywords()));
+//        lResult.setText("Searching for : " + getName() + "\n"
+//                        + "Level range is : " + getLevel() + " - 9\n"
+//                        + "Components are : " + String.join(", ", getComponents()) + "\n"
+//                        + "Usable by : " + String.join(", ", getSelectedClasses()) + "\n"
+//                        + "With logic : " + getLogic() + "\n"
+//                        + "With keywords : " + String.join(", ", getKeywords()));
+        filterModel.setName(getName());
+        filterModel.setMinLevel(getLevel());
+        filterModel.setComponents(getComponents());
+        filterModel.setClasses(getSelectedClasses());
+        filterModel.setClassesLogic(getLogic());
+        filterModel.setKeywords(getKeywords());
 
-        new Thread(() -> searchJob.startJob(filterModel)).start();
+        new Thread(() -> searchJob.startJob(filterModel, resultList)).start();
     }
 
     @FXML
@@ -181,6 +185,7 @@ public class SearchController implements Initializable {
         }
         selectedClasses.clear();
         keywords.clear();
+        resultList.getItems().clear();
     }
 
     @Override

@@ -1,34 +1,28 @@
 package com.bd.front.jobs;
 
-import com.bd.front.SearchSpellApplication;
 import com.bd.front.struct.Creature;
 import com.bd.front.struct.FilterModel;
 import com.bd.front.struct.Spell;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
+import javafx.application.HostServices;
+import javafx.event.EventHandler;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
+import javafx.util.Callback;
 import org.apache.spark.api.java.function.FilterFunction;
-import org.apache.spark.api.java.function.ForeachFunction;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.Encoder;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.types.IntegerType;
+import org.apache.spark.sql.*;
 import scala.collection.mutable.WrappedArray;
 
-import javax.xml.crypto.Data;
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.*;
-import java.util.logging.Filter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class SearchJob implements Serializable {
     private final SparkSession sparkSession;
-    private final SecureRandom random = new SecureRandom();
 
     Dataset<Creature> dsCreatures;
     Dataset<Row> dsSpells;
@@ -40,10 +34,9 @@ public class SearchJob implements Serializable {
         this.sparkSession = sparkSession;
     }
 
-    public void startJob(FilterModel filterModel)
+    public void startJob(FilterModel filterModel, ListView resultList)
     {
         System.out.println(filterModel.toString());
-
         this.filterModel = filterModel;
 
         Encoder<Creature> creatureEncoder = Encoders.bean(Creature.class);
@@ -52,7 +45,7 @@ public class SearchJob implements Serializable {
 //        String creaturesJsonpath = SearchSpellApplication.class.getResource("creatures.json").getPath();
 //        String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
 
-        String creaturesJsonpath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\creatures.json";
+        String creaturesJsonpath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\reversed_creatures.json";
         String spellsJsonPath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\spells.json";
 
         // read JSON file to Dataset
@@ -180,13 +173,39 @@ public class SearchJob implements Serializable {
 
         dsSpells = dsSpells.filter(spellFilterFunction);
 
+
         System.out.println("-- RESULTS --");
         System.out.println("Result size = " + dsSpells.count());
         System.out.println("First 20 elements of result");
         Row[] spells = (Row[]) dsSpells.collect();
-        for (int i = 0; i < spells.length && i < 20; i++) {
-            System.out.println((String) spells[i].getAs("name") + " - "
-                    + spells[i].getAs("components"));
+        for (int i = 0; i < spells.length; i++) {
+            resultList.setCellFactory((Callback<ListView<String>, ListCell<String>>) list -> new ListCell<String>() {
+                {
+                    Text text = new Text();
+                    text.wrappingWidthProperty().bind(list.widthProperty().subtract(30));
+                    text.textProperty().bind(itemProperty());
+
+                    setPrefWidth(0);
+                    setGraphic(text);
+                }
+            });
+
+            String name = spells[i].getAs("name");
+            String description = spells[i].getAs("description");
+
+            List<Row> creatures = dsCreatures.filter(dsCreatures.col("spell").equalTo(name.toLowerCase())).select("creatures").collectAsList();
+            String creaturesString = "";
+            for (Row row : creatures) {
+                WrappedArray<String> arr = (WrappedArray<String>) row.get(0);
+                for (String c : (String[]) arr.array())
+                    creaturesString += c + ", ";
+            }
+            resultList.getItems().add("Name : "
+                    + name
+                    + "\nDescription : "
+                    + description
+                    + "\nCreatures : "
+                    + creaturesString);
         }
     }
 
