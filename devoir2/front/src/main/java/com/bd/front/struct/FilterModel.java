@@ -6,7 +6,7 @@ import java.util.List;
 
 public class FilterModel implements Serializable {
     private String name;
-    private int minLevel;
+    private int minLevel = 0;
     private int maxLevel = 9;
     private List<String> components;
     private List<String> classes;

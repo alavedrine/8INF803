@@ -22,10 +22,9 @@ import javax.xml.crypto.Data;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Filter;
+import java.util.stream.Collectors;
 
 public class SearchJob implements Serializable {
     private final SparkSession sparkSession;
@@ -50,8 +49,11 @@ public class SearchJob implements Serializable {
         Encoder<Creature> creatureEncoder = Encoders.bean(Creature.class);
         Encoder<Spell> spellEncoder = Encoders.bean(Spell.class);
 
-        String creaturesJsonpath = SearchSpellApplication.class.getResource("creatures.json").getPath();
-        String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
+//        String creaturesJsonpath = SearchSpellApplication.class.getResource("creatures.json").getPath();
+//        String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
+
+        String creaturesJsonpath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\creatures.json";
+        String spellsJsonPath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\spells.json";
 
         // read JSON file to Dataset
         dsCreatures = sparkSession.read().option("multiline","true").json(creaturesJsonpath).as(creatureEncoder);
@@ -69,11 +71,55 @@ public class SearchJob implements Serializable {
                 return result;
             }
             private boolean matchesComponents(WrappedArray<String> components) {
+                if (filterModel.getComponents().size() == 0) {
+                    return true;
+                }
                 int n = 0;
                 for(String s : (String[]) components.array()) {
                     if (containsComponent(s)) n++;
                 }
                 return n == components.size();
+            }
+
+            private boolean matchesClassesAndLevel(WrappedArray<String> levels) {
+                if (filterModel.getClasses().size() == 0) {
+                    return true;
+                }
+                int flag = 0;
+                for (String l : (String[]) levels.array()) {
+                    String[] splits = l.split(" ");
+                    String c = splits[0].toLowerCase();
+                    int level = 0;
+                    for (String num : splits) {
+                        if (isInteger(num)) {
+                            level = Integer.parseInt(num);
+                            break;
+                        }
+                    }
+                    if (filterModel
+                            .getClasses()
+                            .stream()
+                            .map(e -> e.toLowerCase())
+                            .collect(Collectors.toList())
+                            .contains(c) && filterModel.getMinLevel() <= level) {
+                        if (filterModel.getClassesLogic().equals("OR")) {
+                            return true;
+                        } else if (filterModel.getClassesLogic().equals("AND")) {
+                            flag++;
+                        }
+                    }
+                }
+                if (filterModel.getClassesLogic().equals("AND")  && flag != 0) {
+                    return flag == filterModel.getClasses().size();
+                }
+                return false;
+            }
+
+            public boolean matchesName(String name) {
+                if (filterModel.getName().length() == 0) {
+                    return true;
+                }
+                return name.toLowerCase().contains(filterModel.getName().toLowerCase());
             }
 
             @Override
@@ -85,8 +131,9 @@ public class SearchJob implements Serializable {
                         spellRow.getAs("spell_resistance"),
                         spellRow.getAs("description"));
 
-                return spell.name.toLowerCase().contains(filterModel.getName().toLowerCase())
-                        && matchesComponents(spell.components);
+                return matchesName(spell.name)
+                        && matchesComponents(spell.components)
+                        && matchesClassesAndLevel(spell.levels);
             }
         };
 
@@ -103,18 +150,27 @@ public class SearchJob implements Serializable {
         }
     }
 
-    private String nextSessionId()
-    {
-        return new BigInteger(130, random).toString(32);
-    }
-
-    private List<String> getLongList(Long count)
-    {
-        List<String> lst = new ArrayList<>();
-        for (long i = 0; i < count; i++)
-        {
-            lst.add(nextSessionId());
+    public static boolean isInteger(String str) {
+        if (str == null) {
+            return false;
         }
-        return lst;
+        int length = str.length();
+        if (length == 0) {
+            return false;
+        }
+        int i = 0;
+        if (str.charAt(0) == '-') {
+            if (length == 1) {
+                return false;
+            }
+            i = 1;
+        }
+        for (; i < length; i++) {
+            char c = str.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 }
