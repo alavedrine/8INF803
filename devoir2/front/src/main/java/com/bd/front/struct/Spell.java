@@ -13,18 +13,20 @@ public class Spell implements Serializable {
     public WrappedArray<String> components;
     public String spellResistance;
     public String description;
+    public String url;
 
     public Spell() {
 
     }
 
-    public Spell(String name, WrappedArray<String> levels, String castingTime, WrappedArray<String> components, String spellResistance, String description) {
+    public Spell(String name, WrappedArray<String> levels, String castingTime, WrappedArray<String> components, String spellResistance, String description, String url) {
         this.name = name;
         this.levels = levels;
         this.castingTime = castingTime;
         this.components = components;
         this.spellResistance = spellResistance;
         this.description = description;
+        this.url = url;
     }
 
     @Override
@@ -36,6 +38,7 @@ public class Spell implements Serializable {
                 ", components=" + components +
                 ", spellResistance='" + spellResistance + '\'' +
                 ", description='" + description + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

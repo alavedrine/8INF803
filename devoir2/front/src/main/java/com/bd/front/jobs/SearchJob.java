@@ -1,13 +1,16 @@
 package com.bd.front.jobs;
 
+import com.bd.front.SearchSpellApplication;
 import com.bd.front.struct.Creature;
 import com.bd.front.struct.FilterModel;
 import com.bd.front.struct.Spell;
 import javafx.application.HostServices;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
@@ -15,7 +18,11 @@ import org.apache.spark.api.java.function.FilterFunction;
 import org.apache.spark.sql.*;
 import scala.collection.mutable.WrappedArray;
 
+import java.awt.*;
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -42,11 +49,11 @@ public class SearchJob implements Serializable {
         Encoder<Creature> creatureEncoder = Encoders.bean(Creature.class);
         Encoder<Spell> spellEncoder = Encoders.bean(Spell.class);
 
-//        String creaturesJsonpath = SearchSpellApplication.class.getResource("creatures.json").getPath();
-//        String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
+        String creaturesJsonpath = SearchSpellApplication.class.getResource("reversed_creatures.json").getPath();
+        String spellsJsonPath = SearchSpellApplication.class.getResource("spells.json").getPath();
 
-        String creaturesJsonpath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\reversed_creatures.json";
-        String spellsJsonPath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\spells.json";
+//        String creaturesJsonpath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\reversed_creatures.json";
+//        String spellsJsonPath = "C:\\Users\\aymer\\Documents\\Admin\\cours_inge\\S9\\8INF803 BD\\devoir2\\front\\src\\main\\java\\com\\bd\\front\\jobs\\spells.json";
 
         // read JSON file to Dataset
         dsCreatures = sparkSession.read().option("multiline","true").json(creaturesJsonpath).as(creatureEncoder);
@@ -162,7 +169,8 @@ public class SearchJob implements Serializable {
                         spellRow.getAs("casting_time"),
                         spellRow.getAs("components"),
                         spellRow.getAs("spell_resistance"),
-                        spellRow.getAs("description"));
+                        spellRow.getAs("description"),
+                        spellRow.getAs("url"));
 
                 return matchesName(spell.name)
                         && matchesComponents(spell.components)
@@ -181,10 +189,30 @@ public class SearchJob implements Serializable {
         for (int i = 0; i < spells.length; i++) {
             resultList.setCellFactory((Callback<ListView<String>, ListCell<String>>) list -> new ListCell<String>() {
                 {
+
                     Text text = new Text();
                     text.wrappingWidthProperty().bind(list.widthProperty().subtract(30));
                     text.textProperty().bind(itemProperty());
-
+                    this.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent mouseEvent) {
+                            if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                                if(mouseEvent.getClickCount() == 2){
+                                    ObservableList selectedIndices = resultList.getSelectionModel().getSelectedIndices();
+                                    int spellIndex = (int) selectedIndices.get(0);
+                                    Desktop desktop = java.awt.Desktop.getDesktop();
+                                    try {
+                                        //specify the protocol along with the URL
+                                        URI oURL = new URI(spells[spellIndex].getAs("url"));
+                                        desktop.browse(oURL);
+                                    } catch (URISyntaxException | IOException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    });
                     setPrefWidth(0);
                     setGraphic(text);
                 }
@@ -200,6 +228,7 @@ public class SearchJob implements Serializable {
                 for (String c : (String[]) arr.array())
                     creaturesString += c + ", ";
             }
+           
             resultList.getItems().add("Name : "
                     + name
                     + "\nDescription : "
